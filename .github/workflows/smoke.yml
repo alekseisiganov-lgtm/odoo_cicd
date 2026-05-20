@@ -1,0 +1,14 @@
+name: smoke
+on:
+  workflow_dispatch:
+jobs:
+  hello:
+    runs-on: [self-hosted, linux, odoo-build]
+    steps:
+      - run: |
+          echo "hello from $(hostname) at $(date)"
+          id
+          uname -a
+          cat /etc/os-release
+          df -h /
+          ip -br addr
