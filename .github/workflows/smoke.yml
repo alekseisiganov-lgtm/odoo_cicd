@@ -1,14 +1,52 @@
 name: smoke
 on:
   workflow_dispatch:
+
 jobs:
   hello:
+    name: Smoke test
     runs-on: [self-hosted, linux, odoo-build]
     steps:
-      - run: |
-          echo "hello from $(hostname) at $(date)"
-          id
+      - name: Runner identity
+        run: |
+          printf 'Hostname:   %s\n' "$(hostname)"
+          printf 'Started at: %s\n' "$(date -Is)"
+          printf 'Running as: %s (uid=%s, gid=%s)\n' "$(id -un)" "$(id -u)" "$(id -g)"
+
+      - name: Operating system
+        run: |
           uname -a
-          cat /etc/os-release
-          df -h /
-          ip -br addr
+          echo "---"
+          grep -E '^(NAME|PRETTY_NAME|VERSION|VERSION_CODENAME)=' /etc/os-release
+
+      - name: Disk and memory
+        run: |
+          echo "Disk:"
+          df -h / /tmp 2>/dev/null | column -t
+          echo
+          echo "Memory:"
+          free -h | head -2
+
+      - name: Network
+        run: |
+          echo "Interfaces:"
+          ip -br addr | grep -v '^lo'
+          echo
+          echo "Default route:"
+          ip route show default
+
+      - name: Build tools
+        run: |
+          for tool in git curl jq tar bash; do
+            if command -v "$tool" >/dev/null 2>&1; then
+              version=$("$tool" --version 2>&1 | head -1)
+              printf '%-8s %s\n' "$tool:" "$version"
+            else
+              printf '%-8s NOT INSTALLED\n' "$tool:"
+            fi
+          done
+
+      - name: Result
+        run: |
+          echo "Smoke test passed — runner operational"
+          echo "VM will self-destruct after this step"
