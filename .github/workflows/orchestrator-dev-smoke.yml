@@ -1,0 +1,35 @@
+name: orchestrator-dev smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: [self-hosted, linux, orchestrator-dev]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: identity
+        run: |
+          uname -a
+          whoami
+          hostname
+          ip -br addr | grep -v '^lo'
+
+      - name: python smoke
+        run: |
+          python3 -c "
+          import sys, json, statistics
+          data = list(range(1, 1001))
+          print(json.dumps({
+              'python': sys.version.split()[0],
+              'mean': statistics.mean(data),
+              'sum': sum(data),
+          }, indent=2))
+          "
+
+      - name: pip + venv smoke
+        run: |
+          python3 -m venv /tmp/venv
+          /tmp/venv/bin/pip install requests -q
+          /tmp/venv/bin/python -c "import requests; print(f'requests {requests.__version__}')"
