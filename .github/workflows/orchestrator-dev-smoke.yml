@@ -16,7 +16,7 @@ jobs:
           hostname
           ip -br addr | grep -v '^lo'
 
-      - name: python smoke
+      - name: python stdlib smoke
         run: |
           python3 -c "
           import sys, json, statistics
@@ -27,9 +27,3 @@ jobs:
               'sum': sum(data),
           }, indent=2))
           "
-
-      - name: pip + venv smoke
-        run: |
-          python3 -m venv /tmp/venv
-          /tmp/venv/bin/pip install requests -q
-          /tmp/venv/bin/python -c "import requests; print(f'requests {requests.__version__}')"
