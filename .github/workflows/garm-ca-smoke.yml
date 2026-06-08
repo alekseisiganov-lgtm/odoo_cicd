@@ -1,0 +1,18 @@
+name: GARM CA smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  ca-smoke:
+    runs-on: uswest1
+    steps:
+      - name: check CA in trust store
+        run: |
+          ls -la /usr/local/share/ca-certificates/
+          openssl verify -CAfile /etc/ssl/certs/ca-certificates.crt /usr/local/share/ca-certificates/rumble-internal.crt
+
+      - name: curl internal bitwarden tls
+        run: |
+          curl -sS -m 10 -o /dev/null -w '%{http_code}\n' \
+            https://tpabitwarden.tpa1.rumble.one/identity/connect/token
