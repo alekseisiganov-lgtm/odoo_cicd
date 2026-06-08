@@ -1,0 +1,29 @@
+name: GARM smoke
+
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: openstack-uswest1
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: identity
+        run: |
+          uname -a
+          whoami
+          hostname
+          ip -br addr | grep -v '^lo'
+
+      - name: python stdlib smoke
+        run: |
+          python3 -c "
+          import sys, json, statistics
+          data = list(range(1, 1001))
+          print(json.dumps({
+              'python': sys.version.split()[0],
+              'mean': statistics.mean(data),
+              'sum': sum(data),
+          }, indent=2))
+          "
